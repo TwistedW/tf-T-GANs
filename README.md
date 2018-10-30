@@ -3,6 +3,8 @@ tensorflow T-GAN
 
 The code is tested on Linux operating system with Python 2.7 or 3.x, TensorFlow 1.4.0+
 
+[Keras Address](https://github.com/bojone/T-GANs)
+
 Paper Address:[Training Generative Adversarial Networks Via Turing Test](https://arxiv.org/abs/1810.10948)
 
 Run the model using this command:
