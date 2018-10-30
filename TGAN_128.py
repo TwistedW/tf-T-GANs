@@ -27,7 +27,7 @@ class TGAN_128(object):
         self.loss_type = args.loss_type
         self.custom_dataset = True
         self.model_name = "TGAN_128_" + args.loss_type  # name for checkpoint
-        self.path = "/media/media/9EA2104DA2102BF1/creat-TwistedW/f_VAEs/CelebA-HQ/train"
+        self.path = "./CelebA-HQ/train"
 
         if self.dataset_name == 'celebA':
             # parameters

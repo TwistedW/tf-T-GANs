@@ -26,7 +26,7 @@ class TGAN_64(object):
         self.input_fname_pattern = '*.png'
         self.custom_dataset = True
         self.model_name = "TGAN_" + args.loss_type  # name for checkpoint
-        self.path = "/media/media/9EA2104DA2102BF1/creat-TwistedW/f_VAEs/CelebA-HQ/train"
+        self.path = "./CelebA-HQ/train"
         self.loss_type = args.loss_type
 
         if self.dataset_name == 'celebA':
