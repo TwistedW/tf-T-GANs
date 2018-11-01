@@ -23,6 +23,6 @@ t-wgan_128:
 
 Please kindly look at the file `main.py` for hyperparameter arguments.
 
-#Tensorflow Version
+# Tensorflow Version
 
 if your tensorflow version >= 1.8, you can set self.custom_dataset = True else self.custom_dataset = False
