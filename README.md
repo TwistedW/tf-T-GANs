@@ -41,8 +41,8 @@ All results are randomly sampled.
 
 *Name* | *Result-64x64* 
 :---: | :---: 
-T-SGAN | <img src = 'images/sgan64.png' height = '250px'>  
-T-WGAN | <img src = 'images/wgan64.png' height = '250px'>
+T-SGAN | <img src = 'images/sgan64.png' height = '400px'>  
+T-WGAN | <img src = 'images/wgan64.png' height = '400px'>
 
 ### Random generation for 128x128 images
 
@@ -50,5 +50,5 @@ All results are randomly sampled.
 
 *Name* | *Result-128x128* 
 :---: | :---: 
-T-SGAN | <img src = 'images/sgan128.png' height = '450px'>  
-T-WGAN | <img src = 'images/wgan128.png' height = '450px'>
+T-SGAN | <img src = 'images/sgan128.png' height = '550px'>  
+T-WGAN | <img src = 'images/wgan128.png' height = '550px'>
