@@ -12,7 +12,6 @@ from utils import *
 
 
 class TGAN_128(object):
-    # 初始化各类定义
     def __init__(self, sess, args):
         self.sess = sess
         self.dataset_name = args.dataset
@@ -63,45 +62,37 @@ class TGAN_128(object):
             if self.dataset_name == 'celebA':
                 net = lrelu(conv2d(x, 64, 4, 4, 2, 2, name='en_conv1', sn=sn))
                 net = lrelu(
-                    bn(conv2d(net, 64, 4, 4, 2, 2, name='en_conv2', sn=sn), is_training=is_training, scope='en_bn2'))
+                    bn(conv2d(net, 128, 4, 4, 2, 2, name='en_conv2', sn=sn), is_training=is_training, scope='en_bn2'))
                 net = lrelu(
-                    bn(conv2d(net, 128, 4, 4, 2, 2, name='en_conv3', sn=sn), is_training=is_training, scope='en_bn3'))
+                    bn(conv2d(net, 256, 4, 4, 2, 2, name='en_conv3', sn=sn), is_training=is_training, scope='en_bn3'))
                 net = lrelu(
-                    bn(conv2d(net, 256, 4, 4, 2, 2, name='en_conv4', sn=sn), is_training=is_training, scope='en_bn4'))
+                    bn(conv2d(net, 256, 4, 4, 1, 1, name='en_conv4', sn=sn), is_training=is_training, scope='en_bn4'))
                 net = lrelu(
-                    bn(conv2d(net, 256, 4, 4, 1, 1, name='en_conv5', sn=sn), is_training=is_training, scope='en_bn5'))
-                net = lrelu(
-                    bn(conv2d(net, 512, 4, 4, 2, 2, name='en_conv6', sn=sn), is_training=is_training, scope='en_bn6'))
+                    bn(conv2d(net, 512, 4, 4, 2, 2, name='en_conv5', sn=sn), is_training=is_training, scope='en_bn5'))
                 return net
 
-    def discriminator(self, x, is_training=True, reuse=False, sn=True):
+    def discriminator(self, x, reuse=False, sn=True):
         with tf.variable_scope("discriminator", reuse=reuse):
             if self.dataset_name == 'celebA':
-                net = tf.reshape(x, [self.batch_size, -1])
-                net = MinibatchLayer(32, 32, net, 'd_fc1')
-                net = lrelu(bn(linear(net, 512, scope='d_fc2', sn=sn), is_training=is_training, scope='d_bn2'))
-                net = lrelu(bn(linear(net, 64, scope='d_fc3', sn=sn), is_training=is_training, scope='d_bn3'))
-                out = linear(net, 1, scope='d_fc4', sn=sn)
+                out = conv2d(x, 4, 4, 4, 1, 1, name='d_conv1', sn=sn)
                 return out
 
     def generator(self, z, is_training=True, reuse=False):
         with tf.variable_scope("generator", reuse=reuse):
             if self.dataset_name == 'celebA':
-                net = tf.nn.relu(bn(linear(z, 1024 * 4 * 4, scope='g_fc1'), is_training=is_training, scope='g_bn1'))
-                net = tf.reshape(net, [self.batch_size, 4, 4, 1024])
-                net = tf.nn.relu(bn(deconv2d(net, [self.batch_size, 4, 4, 512], 4, 4, 1, 1, name='g_dc2'),
+                net = tf.nn.relu(bn(linear(z, 512 * 4 * 4, scope='g_fc1'), is_training=is_training, scope='g_bn1'))
+                net = tf.reshape(net, [self.batch_size, 4, 4, 512])
+                net = tf.nn.relu(bn(deconv2d(net, [self.batch_size, 8, 8, 256], 4, 4, 2, 2, name='g_dc2'),
                                     is_training=is_training, scope='g_bn2'))
-                net = tf.nn.relu(bn(deconv2d(net, [self.batch_size, 8, 8, 256], 4, 4, 2, 2, name='g_dc3'),
+                net = tf.nn.relu(bn(deconv2d(net, [self.batch_size, 8, 8, 256], 4, 4, 1, 1, name='g_dc3'),
                                     is_training=is_training, scope='g_bn3'))
-                net = tf.nn.relu(bn(deconv2d(net, [self.batch_size, 8, 8, 256], 4, 4, 1, 1, name='g_dc4'),
+                net = tf.nn.relu(bn(deconv2d(net, [self.batch_size, 16, 16, 128], 4, 4, 2, 2, name='g_dc4'),
                                     is_training=is_training, scope='g_bn4'))
-                net = tf.nn.relu(bn(deconv2d(net, [self.batch_size, 16, 16, 128], 4, 4, 2, 2, name='g_dc5'),
+                net = tf.nn.relu(bn(deconv2d(net, [self.batch_size, 32, 32, 64], 4, 4, 2, 2, name='g_dc5'),
                                     is_training=is_training, scope='g_bn5'))
-                net = tf.nn.relu(bn(deconv2d(net, [self.batch_size, 32, 32, 64], 4, 4, 2, 2, name='g_dc6'),
+                net = tf.nn.relu(bn(deconv2d(net, [self.batch_size, 64, 64, 32], 4, 4, 2, 2, name='g_dc6'),
                                     is_training=is_training, scope='g_bn6'))
-                net = tf.nn.relu(bn(deconv2d(net, [self.batch_size, 64, 64, 32], 4, 4, 2, 2, name='g_dc7'),
-                                    is_training=is_training, scope='g_bn7'))
-                out = tf.nn.tanh(deconv2d(net, [self.batch_size, 128, 128, 3], 4, 4, 2, 2, name='g_dc8'))
+                out = tf.nn.tanh(deconv2d(net, [self.batch_size, 128, 128, 3], 4, 4, 2, 2, name='g_dc7'))
                 return out
 
     def build_model(self):
@@ -136,8 +127,8 @@ class TGAN_128(object):
         x_fake_encoder = self.encoder(x_fake, is_training=True, reuse=True, sn=True)
         x_real_fake = tf.subtract(x_real_encoder, x_fake_encoder)
         x_fake_real = tf.subtract(x_fake_encoder, x_real_encoder)
-        x_real_fake_score = self.discriminator(x_real_fake, is_training=True, reuse=False, sn=True)
-        x_fake_real_score = self.discriminator(x_fake_real, is_training=True, reuse=True, sn=True)
+        x_real_fake_score = self.discriminator(x_real_fake, reuse=False, sn=True)
+        x_fake_real_score = self.discriminator(x_fake_real, reuse=True, sn=True)
 
         # get loss for discriminator
         self.d_loss = discriminator_loss(self.loss_type, real=x_real_fake_score, fake=x_fake_real_score)
@@ -172,7 +163,8 @@ class TGAN_128(object):
         tf.global_variables_initializer().run()
 
         # graph inputs for visualize training results
-        self.sample_z = np.random.uniform(-1, 1, size=(self.batch_size, self.z_dim))
+        #self.sample_z = np.random.uniform(-1, 1, size=(self.batch_size, self.z_dim))
+        self.sample_z = np.random.normal(0, 1, (self.batch_size, self.z_dim)).astype(np.float32)
 
         # saver to save model
         self.saver = tf.train.Saver()
@@ -187,6 +179,7 @@ class TGAN_128(object):
             start_batch_id = checkpoint_counter - start_epoch * self.num_batches
             counter = checkpoint_counter
             print(" [*] Load SUCCESS")
+
         else:
             start_epoch = 0
             start_batch_id = 0
@@ -198,6 +191,7 @@ class TGAN_128(object):
         past_d_loss = -1
         for epoch in range(start_epoch, self.epoch):
             for idx in range(start_batch_id, self.num_batches):
+                #batch_z = np.random.uniform(-1, 1, size=(self.batch_size, self.z_dim))
                 batch_z = np.random.normal(0, 1, [self.batch_size, self.z_dim]).astype(np.float32)
                 if self.dataset_name == 'celebA':
                     if self.custom_dataset:
@@ -263,7 +257,8 @@ class TGAN_128(object):
 
         """ random condition, random noise """
 
-        z_sample = np.random.uniform(-1, 1, size=(self.batch_size, self.z_dim))
+        #z_sample = np.random.uniform(-1, 1, size=(self.batch_size, self.z_dim))
+        z_sample = np.random.normal(0, 1, (self.batch_size, self.z_dim)).astype(np.float32)
 
         samples = self.sess.run(self.fake_images, feed_dict={self.z: z_sample})
 

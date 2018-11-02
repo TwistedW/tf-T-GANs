@@ -12,7 +12,6 @@ from utils import *
 
 
 class TGAN_64(object):
-    # 初始化各类定义
     def __init__(self, sess, args):
         self.sess = sess
         self.dataset_name = args.dataset
@@ -25,7 +24,7 @@ class TGAN_64(object):
         self.n_critic = 2
         self.input_fname_pattern = '*.png'
         self.custom_dataset = True
-        self.model_name = "TGAN_" + args.loss_type  # name for checkpoint
+        self.model_name = "TGAN_64_" + args.loss_type  # name for checkpoint
         self.path = "./CelebA-HQ/train"
         self.loss_type = args.loss_type
 
@@ -70,14 +69,10 @@ class TGAN_64(object):
                     bn(conv2d(net, 256, 4, 4, 1, 1, name='en_conv4', sn=sn), is_training=is_training, scope='en_bn4'))
                 return net
 
-    def discriminator(self, x, is_training=True, reuse=False, sn=True):
+    def discriminator(self, x, reuse=False, sn=True):
         with tf.variable_scope("discriminator", reuse=reuse):
             if self.dataset_name == 'celebA':
-                net = tf.reshape(x, [self.batch_size, -1])
-                net = MinibatchLayer(32, 32, net, 'd_fc1')
-                net = lrelu(bn(linear(net, 512, scope='d_fc2', sn=sn), is_training=is_training, scope='d_bn2'))
-                net = lrelu(bn(linear(net, 64, scope='d_fc3', sn=sn), is_training=is_training, scope='d_bn3'))
-                out = linear(net, 1, scope='d_fc4', sn=sn)
+                out = conv2d(x, 4, 4, 4, 1, 1, name='d_conv1', sn=sn)
                 return out
 
     def generator(self, z, is_training=True, reuse=False):
@@ -129,8 +124,8 @@ class TGAN_64(object):
         x_fake_encoder = self.encoder(x_fake, is_training=True, reuse=True, sn=True)
         x_real_fake = tf.subtract(x_real_encoder, x_fake_encoder)
         x_fake_real = tf.subtract(x_fake_encoder, x_real_encoder)
-        x_real_fake_score = self.discriminator(x_real_fake, is_training=True, reuse=False, sn=True)
-        x_fake_real_score = self.discriminator(x_fake_real, is_training=True, reuse=True, sn=True)
+        x_real_fake_score = self.discriminator(x_real_fake, reuse=False, sn=True)
+        x_fake_real_score = self.discriminator(x_fake_real, reuse=True, sn=True)
 
         # get loss for discriminator
         self.d_loss = discriminator_loss(self.loss_type, real=x_real_fake_score, fake=x_fake_real_score)
@@ -191,7 +186,7 @@ class TGAN_64(object):
         past_d_loss = -1
         for epoch in range(start_epoch, self.epoch):
             for idx in range(start_batch_id, self.num_batches):
-                batch_z = np.random.normal(0, 1, [self.batch_size, self.z_dim]).astype(np.float32)
+                batch_z = np.random.uniform(-1, 1, size=(self.batch_size, self.z_dim))
                 if self.dataset_name == 'celebA':
                     if self.custom_dataset:
                         train_feed_dict = {

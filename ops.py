@@ -51,6 +51,13 @@ def conv2d(input_, output_dim, k_h=5, k_w=5, d_h=2, d_w=2, name="conv2d", use_bi
             conv = tf.reshape(tf.nn.bias_add(conv, biases), conv.get_shape())
         return conv
 
+def up_sample(input_, output_dim, k_h=5, k_w=5, d_h=1, d_w=1, name="upconv", use_bias=False, sn=False, scale_factor=2):
+    _, h, w, _ = input_.get_shape().as_list()
+    new_size = [h * scale_factor, w * scale_factor]
+    x = tf.image.resize_nearest_neighbor(input_, size=new_size)
+    conv = conv2d(x, output_dim, k_h=k_h, k_w=k_w, d_h=d_h, d_w=d_w, name=name, use_bias=use_bias, sn=sn)
+    return conv
+
 def deconv2d(input_, output_shape, k_h=5, k_w=5, d_h=2, d_w=2, name="deconv2d", with_w=False, use_bias=False, sn=False):
     with tf.variable_scope(name):
         # filter : [height, width, output_channels, in_channels]
@@ -143,6 +150,9 @@ def spectral_norm(w, iteration=1):
 
 def l2_norm(v, eps=1e-12):
     return v / (tf.reduce_sum(v ** 2) ** 0.5 + eps)
+
+def flatten(x):
+    return tf.layers.flatten(x)
 
 ##################################################################################
 # Loss function
